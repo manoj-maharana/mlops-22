@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 # Import datasets, classifiers and performance metrics
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 # 1. set the ranges of hyper parameters 
 gamma_list = [0.01, 0.005, 0.001, 0.0005, 0.0001]
@@ -86,8 +87,10 @@ for cur_h_params in h_param_comb:
     cur_acc = metrics.accuracy_score(y_pred=predicted_dev, y_true=y_dev)
     cur_acc_train = metrics.accuracy_score(y_pred=predicted_train, y_true=y_train)
     cur_acc_test = metrics.accuracy_score(y_pred=predicted_test, y_true=y_test)
+    
 
     print(cur_h_params, "\t", round(cur_acc_train, 3), "\t", round(cur_acc, 3), "\t", round(cur_acc_test, 3))
+    
 
     # 3. identify the combination-of-hyper-parameter for which validation set accuracy is the highest. 
     if cur_acc > best_acc:
@@ -115,20 +118,23 @@ acc_train = metrics.accuracy_score(y_pred=predicted_train, y_true=y_train)
 acc_dev = metrics.accuracy_score(y_pred=predicted_dev, y_true=y_dev)
 acc_test = metrics.accuracy_score(y_pred=predicted_test, y_true=y_test)
 
-#PART: Sanity check of predictions
-# _, axes = plt.subplots(nrows=1, ncols=4, figsize=(10, 3))
-# for ax, image, prediction in zip(axes, X_test, predicted):
-#     ax.set_axis_off()
-#     image = image.reshape(8, 8)
-#     ax.imshow(image, cmap=plt.cm.gray_r, interpolation="nearest")
-#     ax.set_title(f"Prediction: {prediction}")
-
-# 4. report the test set accurancy with that best model.
-#PART: Compute evaluation metrics
-# print(
-#     f"Classification report for classifier {clf}:\n"
-#     f"{metrics.classification_report(y_test, predicted)}\n"
-# )
 
 print("Best hyperparameters were:")
 print(cur_h_params,"\t", round(acc_train,3) ,"\t",round(acc_dev,3) ,"\t",round(acc_test,3) )
+
+
+
+def print_accuracy(accuracy):
+    print('Minimum Accuracy {}'.format(np.min(accuracy)))
+    print('Max Accuracy {}'.format(np.min(accuracy)))
+    print('Mean Accuracy {}'.format(np.mean(accuracy)))
+    print('Median Accuracy {}'.format(np.median(accuracy)))
+    print('\n')
+
+print('train accuracy')
+print_accuracy(acc_train)
+print('dev accuracy')
+print_accuracy(acc_dev)
+print('test accuracy')
+print_accuracy(acc_test)
+
