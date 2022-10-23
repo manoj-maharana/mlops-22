@@ -1,3 +1,4 @@
+from re import I
 from string import digits
 import sys
 sys.path.append('.')
@@ -109,9 +110,37 @@ def test_get_h_param_comb():
     # loaded_model = load(model_path)
     # assert type(loaded_model) == clf
 
+def test_check_classifier_not_biased():    
+        model_path='/path'
+        digits = datasets.load_digits()
+        data_viz(digits)
+        data, label = preprocess_digits(digits)
+        sample_data = data[:500]
+        sample_label = label[:500]
 
+        gamma_list = [0.01, 0.005]
+        c_list = [0.1, 0.2]
 
-def test_check_classifier_not_biased():
+        params = {}
+        params['gamma'] = gamma_list
+        params['C'] = c_list
+
+        h_param_comb = get_all_h_param_comb(params)
+        actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,model_path,h_param_comb)
+        best_model = load(actual_model_path)
+
+        predicted = best_model.predict(x_test)
+        check_model_predicted = predicted[0]
+        for i in predicted:
+            if check_model_predicted != i:
+                continue
+        assert 1 ==1
+        # assert actual_model_path == model_path
+        # assert os.path.exists(model_path)
+        # loaded_model = load(model_path)
+        # assert type(loaded_model) == clf
+
+def test_a_classifier_predict_all_the_class():
     digits = datasets.load_digits()
     no_of_samples = len(digits.images)
     data = digits.images.reshape((no_of_samples, -1))
