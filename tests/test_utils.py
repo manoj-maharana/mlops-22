@@ -82,28 +82,44 @@ def test_get_h_param_comb():
 
 
 
-def test_check_classifier_not_biased():
+# def test_check_classifier_not_biased():
+
     
-    best_model = load(model_path)
+#     model_path='/path'
+#     digits = datasets.load_digits()
+#     data_viz(digits)
+#     data, label = preprocess_digits(digits)
+#     sample_data = data[:500]
+#     sample_label = label[:500]
 
-    predicted = best_model.predict(x_test)
-    model_path='/path'
+#     gamma_list = [0.01, 0.005]
+#     c_list = [0.1, 0.2]
+
+#     params = {}
+#     params['gamma'] = gamma_list
+#     params['C'] = c_list
+
+#     h_param_comb = get_all_h_param_comb(params)
+#     actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,sample_data,model_path,h_param_comb)
+#     best_model = load(actual_model_path)
+
+#     predicted = best_model.predict(x_test)
+    # assert actual_model_path == model_path
+    # assert os.path.exists(model_path)
+    # loaded_model = load(model_path)
+    # assert type(loaded_model) == clf
+
+
+
+def test_check_classifier_not_biased():
     digits = datasets.load_digits()
-    data_viz(digits)
-    data, label = preprocess_digits(digits)
-    sample_data = data[:500]
-    sample_label = label[:500]
-
-    gamma_list = [0.01, 0.005]
-    c_list = [0.1, 0.2]
-
-    params = {}
-    params['gamma'] = gamma_list
-    params['C'] = c_list
-
-    h_param_comb = get_all_h_param_comb(params)
-    actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,sample_data,model_path,h_param_comb)
-    assert actual_model_path == model_path
-    assert os.path.exists(model_path)
-    loaded_model = load(model_path)
-    assert type(loaded_model) == clf
+    no_of_samples = len(digits.images)
+    data = digits.images.reshape((no_of_samples, -1))
+    label = digits.target
+    #load the model
+    model = load("svm_gamma=0.0005_C=5.joblib")
+    predict = model.predict(data)
+    checker = list(set(label))
+    predicted = list(set(predict))
+    #check length of both the model
+    assert len(checker) == len(predicted)
