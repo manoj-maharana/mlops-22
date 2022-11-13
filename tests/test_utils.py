@@ -1,13 +1,12 @@
-from re import I
-from string import digits
-import sys
-sys.path.append('.')
-from sklearn import datasets
-import pdb
-import os
+import sys, os
+import numpy as np
+from joblib import load
 
-from joblib import  load
-from utils import get_all_h_param_comb, train_dev_test_split, train_save_model,data_viz,preprocess_digits
+
+sys.path.append(".")
+
+from utils import get_all_h_param_comb, tune_and_save
+from sklearn import svm, metrics
 
 # test case to check if all the combinations of the hyper parameters are indeed getting created
 def test_get_h_param_comb():
@@ -15,15 +14,88 @@ def test_get_h_param_comb():
     c_list = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
 
     params = {}
-    params['gamma'] = gamma_list
-    params['C'] = c_list
+    params["gamma"] = gamma_list
+    params["C"] = c_list
     h_param_comb = get_all_h_param_comb(params)
 
     assert len(h_param_comb) == len(gamma_list) * len(c_list)
 
+def helper_h_params():
+    # small number of h params
+    gamma_list = [0.01, 0.005]
+    c_list = [0.1, 0.2]
 
-#what more test cases should be there 
-#irrespective of the changes to the refactored code.
+    params = {}
+    params["gamma"] = gamma_list
+    params["C"] = c_list
+    h_param_comb = get_all_h_param_comb(params)
+    return h_param_comb
+
+def helper_create_bin_data(n=100, d=7):
+    x_train_0 = np.random.randn(n, d)
+    x_train_1 = 1.5 + np.random.randn(n, d)
+    x_train = np.vstack((x_train_0, x_train_1))
+    y_train = np.zeros(2 * n)
+    y_train[n:] = 1
+
+    return x_train, y_train
+
+def test_tune_and_save():    
+    h_param_comb = helper_h_params()
+    x_train, y_train = helper_create_bin_data(n=100, d=7)
+    x_dev, y_dev = x_train, y_train
+
+    clf = svm.SVC()
+    metric = metrics.accuracy_score
+    
+    model_path = "test_run_model_path.joblib"
+    actual_model_path = tune_and_save(clf, x_train, y_train, x_dev, y_dev, metric, h_param_comb, model_path)
+
+    assert actual_model_path == model_path
+    assert os.path.exists(actual_model_path)
+    assert type(load(actual_model_path)) == type(clf)
+
+
+def test_not_biased():    
+    h_param_comb = helper_h_params()
+    x_train, y_train = helper_create_bin_data(n=100, d=7)
+    x_dev, y_dev = x_train, y_train
+    x_test, y_test = x_train, y_train
+
+    clf = svm.SVC()
+    metric = metrics.accuracy_score
+    
+    model_path = "test_run_model_path.joblib"
+    actual_model_path = tune_and_save(clf, x_train, y_train, x_dev, y_dev, metric, h_param_comb, model_path)
+    best_model = load(actual_model_path)
+
+    predicted = best_model.predict(x_test)
+
+    assert len(set(predicted))!=1
+
+
+def test_predicts_all():    
+    h_param_comb = helper_h_params()
+    x_train, y_train = helper_create_bin_data(n=100, d=7)
+    x_dev, y_dev = x_train, y_train
+    x_test, y_test = x_train, y_train
+
+    clf = svm.SVC()
+    metric = metrics.accuracy_score
+    
+    model_path = "test_run_model_path.joblib"
+    actual_model_path = tune_and_save(clf, x_train, y_train, x_dev, y_dev, metric, h_param_comb, model_path)
+    best_model = load(actual_model_path)
+
+    predicted = best_model.predict(x_test)
+
+    assert set(predicted) == set(y_test)
+
+# def test_set_to_fail():
+#     assert 1==0
+
+# what more test cases should be there
+# irrespective of the changes to the refactored code.
 
 # train/dev/test split functionality : input 200 samples, fraction is 70:15:15, then op should have 140:30:30 samples in each set
 
@@ -39,8 +111,8 @@ def test_get_h_param_comb():
 # this is dependent on the execution environment (as close the actual prod/runtime environment)
 
 
-# model variance? -- 
-# bias vs variance in ML ? 
+# model variance? --
+# bias vs variance in ML ?
 # std([model(train_1), model(train_2), ..., model(train_k)]) < threshold
 
 
@@ -53,102 +125,5 @@ def test_get_h_param_comb():
 # model persistance?
 # train the model -- check perf -- write the model to disk
 # is the model loaded from the disk same as what we had written?
-# assert acc(loaded_model) == expected_acc 
-# assert predictions (loaded_model) == expected_prediction 
-
-
-
-#pdb.set_trace()
-# def test_check_model_saving():
-#     model_path='/path'
-#     digits = datasets.load_digits()
-#     data_viz(digits)
-#     data, label = preprocess_digits(digits)
-#     sample_data = data[:500]
-#     sample_label = label[:500]
-
-#     gamma_list = [0.01, 0.005]
-#     c_list = [0.1, 0.2]
-
-#     params = {}
-#     params['gamma'] = gamma_list
-#     params['C'] = c_list
-
-#     h_param_comb = get_all_h_param_comb(params)
-#     actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,sample_data,model_path,h_param_comb)
-#     assert actual_model_path == model_path
-#     assert os.path.exists(model_path)
-#     loaded_model = load(model_path)
-#     assert type(loaded_model) == clf
-
-
-
-# def test_check_classifier_not_biased():
-
-    
-#     model_path='/path'
-#     digits = datasets.load_digits()
-#     data_viz(digits)
-#     data, label = preprocess_digits(digits)
-#     sample_data = data[:500]
-#     sample_label = label[:500]
-
-#     gamma_list = [0.01, 0.005]
-#     c_list = [0.1, 0.2]
-
-#     params = {}
-#     params['gamma'] = gamma_list
-#     params['C'] = c_list
-
-#     h_param_comb = get_all_h_param_comb(params)
-#     actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,sample_data,model_path,h_param_comb)
-#     best_model = load(actual_model_path)
-
-#     predicted = best_model.predict(x_test)
-    # assert actual_model_path == model_path
-    # assert os.path.exists(model_path)
-    # loaded_model = load(model_path)
-    # assert type(loaded_model) == clf
-
-def test_check_classifier_not_biased():    
-        model_path='/path'
-        digits = datasets.load_digits()
-        data_viz(digits)
-        data, label = preprocess_digits(digits)
-        sample_data = data[:500]
-        sample_label = label[:500]
-
-        gamma_list = [0.01, 0.005]
-        c_list = [0.1, 0.2]
-
-        params = {}
-        params['gamma'] = gamma_list
-        params['C'] = c_list
-
-        h_param_comb = get_all_h_param_comb(params)
-        actual_model_path,x_test,y_test,best_h_params,clf =  train_save_model(sample_data,sample_label,sample_data,model_path,h_param_comb)
-        best_model = load(actual_model_path)
-
-        predicted = best_model.predict(x_test)
-        check_model_predicted = predicted[0]
-        for i in predicted:
-            if check_model_predicted != i:
-                continue
-        assert 1 ==1
-        # assert actual_model_path == model_path
-        # assert os.path.exists(model_path)
-        # loaded_model = load(model_path)
-        # assert type(loaded_model) == clf
-
-def test_a_classifier_predict_all_the_class():
-    digits = datasets.load_digits()
-    no_of_samples = len(digits.images)
-    data = digits.images.reshape((no_of_samples, -1))
-    label = digits.target
-    #load the model
-    model = load("svm_gamma=0.0005_C=5.joblib")
-    predict = model.predict(data)
-    checker = list(set(label))
-    predicted = list(set(predict))
-    #check length of both the model
-    assert len(checker) == len(predicted)
+# assert acc(loaded_model) == expected_acc
+# assert predictions (loaded_model) == expected_prediction
