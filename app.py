@@ -1,9 +1,10 @@
 from flask import Flask
 from flask import request
 from joblib import load
+import numpy as np
 
 app = Flask(__name__)
-model_path = "svm_gamma=0.0005_C=2.joblib"
+model_path = "svm_gamma=0.005_C=1.joblib"
 model = load(model_path)
 
 @app.route("/")
@@ -31,3 +32,15 @@ def predict_digit():
     print("done loading")
     predicted = model.predict([image])
     return {"y_predicted":int(predicted[0])}
+
+@app.route("/predictmultipleimages", methods=['POST'])
+def predict_multiple_image_digit():
+    image_1 = request.json['image']
+    image_2 = request.json['image']
+    print("done loading")
+    predicted_1 = model.predict([image_1])
+    predicted_2 = model.predict([image_2])
+    return {"both matched:": str(predicted_1[0] == predicted_2[0])}
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
