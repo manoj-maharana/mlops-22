@@ -66,6 +66,7 @@ for n in range(n_cv):
 
         # 2. load the best_model
         best_model = load(actual_model_path)
+        print(best_model)
 
         # PART: Get test set predictions
         # Predict the value of the digit on the test subset
