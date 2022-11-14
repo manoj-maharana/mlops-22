@@ -35,8 +35,8 @@ def predict_digit():
 
 @app.route("/predictmultipleimages", methods=['POST'])
 def predict_multiple_image_digit():
-    image_1 = request.json['image']
-    image_2 = request.json['image']
+    image_1 = request.json['image_1']
+    image_2 = request.json['image_2']
     print("done loading")
     predicted_1 = model.predict([image_1])
     predicted_2 = model.predict([image_2])
