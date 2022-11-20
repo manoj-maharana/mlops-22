@@ -1,6 +1,7 @@
 # PART: library dependencies -- sklear, torch, tensorflow, numpy, transformers
 
 # Import datasets, classifiers and performance metrics
+import argparse
 from sklearn import datasets, svm, metrics, tree
 import pdb
 
@@ -17,6 +18,15 @@ from joblib import dump, load
 train_frac, dev_frac, test_frac = 0.8, 0.1, 0.1
 assert train_frac + dev_frac + test_frac == 1.0
 
+parser = argparse.ArgumentParser()
+# Adding Argument
+parser.add_argument('--x', type=int,
+                    required=True)
+parser.add_argument('--y', type=str,
+                    required=True)
+random_states = parser.parse_args()
+print(random_states.x)
+print(random_states.y)
 # 1. set the ranges of hyper parameters
 gamma_list = [0.01, 0.005, 0.001, 0.0005, 0.0001]
 c_list = [0.1, 0.2, 0.5, 0.7, 1, 2, 5, 7, 10]
@@ -49,14 +59,21 @@ n_cv = 5
 results = {}
 for n in range(n_cv):
     x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
-        data, label, train_frac, dev_frac
+        data, label, train_frac, dev_frac,random_states
     )
     # PART: Define the model
     # Create a classifier: a support vector classifier
-    models_of_choice = {
-        "svm": svm.SVC(),
-        "decision_tree": tree.DecisionTreeClassifier(),
-    }
+    models_of_choice={}
+    if random_states.y == 'svm':
+        models_of_choice['svm']=svm.SVC()
+    else:
+        models_of_choice['decision_tree']=tree.DecisionTreeClassifier()
+        
+
+    # models_of_choice = {
+    #     "svm": svm.SVC(),
+    #     "decision_tree": tree.DecisionTreeClassifier(),
+    # }
     for clf_name in models_of_choice:
         clf = models_of_choice[clf_name]
         print("[{}] Running hyper param tuning for {}".format(n,clf_name))
@@ -83,3 +100,11 @@ for n in range(n_cv):
         )
 
 print(results)
+
+model_name ="model saved at:"+ actual_model_path
+print(model_name)
+
+txt_file_name = "results/"+ str(random_states.y) + "_" + str(random_states.x)+ ".txt"
+print(txt_file_name)
+with open(txt_file_name, "w") as text_file:
+    text_file.write(str(model_name) + str(results))

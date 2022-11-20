@@ -19,10 +19,12 @@ COPY . .
 # ARG x
 # ARG y
 
-EXPOSE 5000
+#EXPOSE 5000
 
-ENV classi_name="svm"
-ENV randomstate="24"
+# ENV classi_name="svm"
+# ENV randomstate="24"
 # CMD ["python3", "./plot_graphs.py","--x=${randomstate}","--y=${classi_name}"]
-CMD ["python3", "./plot_graphs.py","--x=24","--y=svm"]
+#CMD ["python3", "./plot_graphs.py","--x=24","--y=svm"]
+EXPOSE 5000
+CMD ["python3", "./app.py" ]
 
