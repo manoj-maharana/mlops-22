@@ -51,5 +51,6 @@ def predict_multiple_image_digit():
     predicted_2 = model.predict([image_2])
     return {"both matched:": str(predicted_1[0] == predicted_2[0])}
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
+    
     app.run(host='0.0.0.0', port=5000)
