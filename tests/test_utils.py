@@ -105,7 +105,7 @@ def test_random_seed_states_are_same():
     
     for n in range(n_cv):
         x_train, y_train, x_dev, y_dev, x_test, y_test = train_dev_test_split(
-            data, label, train_frac, dev_frac
+            data, label, train_frac, dev_frac,24
         )
         assert x_train_input == len(x_train)
  
